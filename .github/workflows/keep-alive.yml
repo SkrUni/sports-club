@@ -1,0 +1,20 @@
+name: Keep Next.js Alive
+
+on:
+  schedule:
+    # Запускается каждые 10 минут
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Можно запустить вручную
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Next.js
+        run: |
+          curl -f https://sports-club-nextjs.onrender.com/ || echo "Service might be sleeping, but ping sent"
+      
+      - name: Ping Spring Boot
+        run: |
+          curl -f https://sports-club-spring.onrender.com/ || echo "Service might be sleeping, but ping sent"
+
