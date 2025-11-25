@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
       SELECT 
         p.*,
         c.name as client_name,
-        c.phone as client_phone,
         s.name as service_name
       FROM payments p
       JOIN clients c ON p.client_id = c.id
@@ -83,7 +82,6 @@ export async function POST(request: NextRequest) {
       SELECT 
         p.*,
         c.name as client_name,
-        c.phone as client_phone,
         s.name as service_name
       FROM payments p
       JOIN clients c ON p.client_id = c.id
