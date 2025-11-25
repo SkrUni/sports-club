@@ -222,41 +222,51 @@ export async function createDefaultAdmin() {
     }
     
     // Создаём тренера
-    const existingTrainer = db.prepare('SELECT id FROM users WHERE email = ?').get('trainer@sportsclub.com');
-    if (!existingTrainer) {
+    let trainerUser = db.prepare('SELECT id FROM users WHERE email = ?').get('trainer@sportsclub.com') as { id: number } | undefined;
+    if (!trainerUser) {
       const hashedPassword = await bcrypt.hash('trainer123', 12);
       const userStmt = db.prepare(`
         INSERT INTO users (email, password, name, role)
         VALUES (?, ?, ?, 'trainer')
       `);
       const result = userStmt.run('trainer@sportsclub.com', hashedPassword, 'Иван Тренеров');
-      
-      // Добавляем запись в таблицу staff
+      trainerUser = { id: result.lastInsertRowid as number };
+      console.log('Тренер создан: trainer@sportsclub.com / trainer123');
+    }
+    
+    // Проверяем и добавляем запись в staff если её нет
+    const trainerStaff = db.prepare('SELECT id FROM staff WHERE user_id = ?').get(trainerUser.id);
+    if (!trainerStaff) {
       const staffStmt = db.prepare(`
         INSERT INTO staff (user_id, specialization, work_start, work_end, slot_duration)
         VALUES (?, ?, ?, ?, ?)
       `);
-      staffStmt.run(result.lastInsertRowid, 'Fitness', '09:00', '18:00', 60);
-      console.log('Тренер создан: trainer@sportsclub.com / trainer123');
+      staffStmt.run(trainerUser.id, 'trainer', '09:00', '18:00', 60);
+      console.log('Запись в staff для тренера создана');
     }
     
     // Создаём массажиста
-    const existingMasseur = db.prepare('SELECT id FROM users WHERE email = ?').get('masseur@sportsclub.com');
-    if (!existingMasseur) {
+    let masseurUser = db.prepare('SELECT id FROM users WHERE email = ?').get('masseur@sportsclub.com') as { id: number } | undefined;
+    if (!masseurUser) {
       const hashedPassword = await bcrypt.hash('masseur123', 12);
       const userStmt = db.prepare(`
         INSERT INTO users (email, password, name, role)
         VALUES (?, ?, ?, 'masseur')
       `);
       const result = userStmt.run('masseur@sportsclub.com', hashedPassword, 'Петр Массажистов');
-      
-      // Добавляем запись в таблицу staff
+      masseurUser = { id: result.lastInsertRowid as number };
+      console.log('Массажист создан: masseur@sportsclub.com / masseur123');
+    }
+    
+    // Проверяем и добавляем запись в staff если её нет
+    const masseurStaff = db.prepare('SELECT id FROM staff WHERE user_id = ?').get(masseurUser.id);
+    if (!masseurStaff) {
       const staffStmt = db.prepare(`
         INSERT INTO staff (user_id, specialization, work_start, work_end, slot_duration)
         VALUES (?, ?, ?, ?, ?)
       `);
-      staffStmt.run(result.lastInsertRowid, 'Массаж', '09:00', '18:00', 60);
-      console.log('Массажист создан: masseur@sportsclub.com / masseur123');
+      staffStmt.run(masseurUser.id, 'masseur', '09:00', '18:00', 60);
+      console.log('Запись в staff для массажиста создана');
     }
   } catch (error) {
     console.error('Ошибка создания администратора:', error);

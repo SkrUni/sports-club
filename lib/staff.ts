@@ -19,19 +19,43 @@ export interface StaffAvailability {
 }
 
 export function getStaffMemberByUserId(userId: number): StaffMember | null {
-  const stmt = db.prepare('SELECT * FROM staff WHERE user_id = ?');
+  const stmt = db.prepare(`
+    SELECT 
+      st.*,
+      u.name as name,
+      u.email as email
+    FROM staff st
+    JOIN users u ON st.user_id = u.id
+    WHERE st.user_id = ?
+  `);
   const staff = stmt.get(userId) as StaffMember | undefined;
   return staff ?? null;
 }
 
 export function getStaffMemberById(staffId: number): StaffMember | null {
-  const stmt = db.prepare('SELECT * FROM staff WHERE id = ?');
+  const stmt = db.prepare(`
+    SELECT 
+      st.*,
+      u.name as name,
+      u.email as email
+    FROM staff st
+    JOIN users u ON st.user_id = u.id
+    WHERE st.id = ?
+  `);
   const staff = stmt.get(staffId) as StaffMember | undefined;
   return staff ?? null;
 }
 
 export function listStaffMembers(): StaffMember[] {
-  const stmt = db.prepare('SELECT * FROM staff ORDER BY id ASC');
+  const stmt = db.prepare(`
+    SELECT 
+      st.*,
+      u.name as name,
+      u.email as email
+    FROM staff st
+    JOIN users u ON st.user_id = u.id
+    ORDER BY u.name ASC
+  `);
   return stmt.all() as StaffMember[];
 }
 
