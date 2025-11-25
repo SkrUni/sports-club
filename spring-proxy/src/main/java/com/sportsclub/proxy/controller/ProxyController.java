@@ -124,26 +124,44 @@ public class ProxyController {
     private String extractErrorMessage(HttpClientErrorException e) {
         try {
             String responseBody = e.getResponseBodyAsString();
+            System.err.println("📄 Тело ответа об ошибке: " + responseBody);
+            
             if (responseBody != null && !responseBody.isEmpty()) {
                 // Пытаемся распарсить JSON
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
-                
-                if (errorMap.containsKey("error")) {
-                    return "{\"error\":\"" + errorMap.get("error").toString().replace("\"", "\\\"") + "\"}";
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
+                    
+                    if (errorMap.containsKey("error")) {
+                        String errorMsg = errorMap.get("error").toString();
+                        System.err.println("✅ Извлечено сообщение об ошибке: " + errorMsg);
+                        // Экранируем специальные символы для JSON
+                        errorMsg = errorMsg.replace("\\", "\\\\")
+                                          .replace("\"", "\\\"")
+                                          .replace("\n", "\\n")
+                                          .replace("\r", "\\r")
+                                          .replace("\t", "\\t");
+                        return "{\"error\":\"" + errorMsg + "\"}";
+                    }
+                } catch (Exception jsonException) {
+                    System.err.println("⚠️ Ошибка парсинга JSON: " + jsonException.getMessage());
                 }
                 
                 // Если это уже валидный JSON, возвращаем как есть
                 if (responseBody.trim().startsWith("{")) {
+                    System.err.println("✅ Возвращаем JSON как есть");
                     return responseBody;
                 }
             }
         } catch (Exception parseException) {
             System.err.println("⚠️ Не удалось распарсить ответ об ошибке: " + parseException.getMessage());
+            parseException.printStackTrace();
         }
         
         // Если не удалось распарсить, возвращаем общее сообщение
-        return "{\"error\":\"" + e.getStatusText() + "\"}";
+        String statusText = e.getStatusText() != null ? e.getStatusText() : "Bad Request";
+        System.err.println("⚠️ Используем статус как сообщение: " + statusText);
+        return "{\"error\":\"Ошибка валидации: " + statusText + "\"}";
     }
     
     /**
@@ -152,26 +170,44 @@ public class ProxyController {
     private String extractErrorMessage(HttpServerErrorException e) {
         try {
             String responseBody = e.getResponseBodyAsString();
+            System.err.println("📄 Тело ответа об ошибке сервера: " + responseBody);
+            
             if (responseBody != null && !responseBody.isEmpty()) {
                 // Пытаемся распарсить JSON
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
-                
-                if (errorMap.containsKey("error")) {
-                    return "{\"error\":\"" + errorMap.get("error").toString().replace("\"", "\\\"") + "\"}";
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
+                    
+                    if (errorMap.containsKey("error")) {
+                        String errorMsg = errorMap.get("error").toString();
+                        System.err.println("✅ Извлечено сообщение об ошибке: " + errorMsg);
+                        // Экранируем специальные символы для JSON
+                        errorMsg = errorMsg.replace("\\", "\\\\")
+                                          .replace("\"", "\\\"")
+                                          .replace("\n", "\\n")
+                                          .replace("\r", "\\r")
+                                          .replace("\t", "\\t");
+                        return "{\"error\":\"" + errorMsg + "\"}";
+                    }
+                } catch (Exception jsonException) {
+                    System.err.println("⚠️ Ошибка парсинга JSON: " + jsonException.getMessage());
                 }
                 
                 // Если это уже валидный JSON, возвращаем как есть
                 if (responseBody.trim().startsWith("{")) {
+                    System.err.println("✅ Возвращаем JSON как есть");
                     return responseBody;
                 }
             }
         } catch (Exception parseException) {
             System.err.println("⚠️ Не удалось распарсить ответ об ошибке: " + parseException.getMessage());
+            parseException.printStackTrace();
         }
         
         // Если не удалось распарсить, возвращаем общее сообщение
-        return "{\"error\":\"" + e.getStatusText() + "\"}";
+        String statusText = e.getStatusText() != null ? e.getStatusText() : "Internal Server Error";
+        System.err.println("⚠️ Используем статус как сообщение: " + statusText);
+        return "{\"error\":\"Ошибка сервера: " + statusText + "\"}";
     }
 
     /**

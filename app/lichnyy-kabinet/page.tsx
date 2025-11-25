@@ -166,31 +166,34 @@ export default function ClientPortalPage() {
       console.log('Статус ответа:', response.status);
       console.log('Content-Type:', response.headers.get('content-type'));
 
-      const contentType = response.headers.get('content-type') || '';
+      // Читаем ответ один раз
+      const text = await response.text();
+      console.log('Текст ответа:', text);
+      console.log('Content-Type:', response.headers.get('content-type'));
+      console.log('Статус:', response.status);
+      
       let responseData: any = {};
-
-      if (contentType.includes('application/json')) {
+      
+      // Пытаемся распарсить как JSON
+      if (text && text.trim().startsWith('{')) {
         try {
-          const text = await response.text();
-          console.log('Текст ответа:', text);
-          responseData = text ? JSON.parse(text) : {};
+          responseData = JSON.parse(text);
+          console.log('✅ Успешно распарсен JSON:', responseData);
         } catch (parseError) {
-          console.error('Ошибка парсинга JSON:', parseError);
-          setError('Ошибка обработки ответа сервера');
-          setSubmitting(false);
-          return;
+          console.error('❌ Ошибка парсинга JSON:', parseError);
+          // Если не удалось распарсить JSON, но есть текст, используем его как ошибку
+          if (text && text.length < 500) {
+            responseData = { error: text };
+          } else {
+            responseData = { error: 'Ошибка обработки ответа сервера' };
+          }
         }
-      } else {
-        // Если ответ не JSON, пытаемся прочитать как текст
-        const text = await response.text();
-        console.log('Текст ответа (не JSON):', text);
-        if (text && text.length < 500) {
-          // Если текст короткий, возможно это сообщение об ошибке
-          responseData = { error: text };
-        }
+      } else if (text && text.length < 500) {
+        // Если это не JSON, но есть короткий текст, используем его как ошибку
+        responseData = { error: text };
       }
 
-      console.log('Ответ сервера:', responseData);
+      console.log('Ответ сервера (финальный):', responseData);
 
       if (response.ok) {
         console.log('Запись успешно создана');

@@ -173,7 +173,7 @@ export function isTimeWithinWorkingHours(
   if (isNaN(bookingHours) || bookingHours < 6 || bookingHours > 23) {
     return {
       valid: false,
-      error: `Некорректное время записи. Укажите время от 6:00 до 23:00`
+      error: `Некорректное время записи. Выберите время от 6:00 до 23:00`
     };
   }
 
@@ -186,7 +186,7 @@ export function isTimeWithinWorkingHours(
     console.log(`  ❌ Время ${normalizedBookingTime} раньше начала рабочего дня`);
     return {
       valid: false,
-      error: `Время записи ${normalizedBookingTime} раньше начала рабочего дня (${staff.work_start})`
+      error: `Это не рабочее время специалиста. Рабочее время: ${staff.work_start} - ${staff.work_end}`
     };
   }
 
@@ -195,7 +195,7 @@ export function isTimeWithinWorkingHours(
     console.log(`  ❌ Время ${normalizedBookingTime} позже или равно окончанию рабочего дня`);
     return {
       valid: false,
-      error: `Время записи ${normalizedBookingTime} позже или равно окончанию рабочего дня (${staff.work_end})`
+      error: `Это не рабочее время специалиста. Рабочее время: ${staff.work_start} - ${staff.work_end}`
     };
   }
 
@@ -206,7 +206,7 @@ export function isTimeWithinWorkingHours(
     console.log(`  ❌ Время записи ${normalizedBookingTime} + длительность ${staff.slot_duration} мин превышает конец рабочего дня`);
     return {
       valid: false,
-      error: `Время записи ${normalizedBookingTime} не подходит: занятие закончится в ${slotEndTime}, что позже окончания рабочего дня (${staff.work_end})`
+      error: `Это время не подходит: занятие закончится в ${slotEndTime}, что позже окончания рабочего дня специалиста (${staff.work_end}). Рабочее время: ${staff.work_start} - ${staff.work_end}`
     };
   }
 
@@ -232,7 +232,7 @@ export function isTimeSlotAvailable(
   if (existing) {
     return {
       available: false,
-      error: `Время ${bookingTime} уже занято`
+      error: `Это время уже занято. Выберите другое время`
     };
   }
 
