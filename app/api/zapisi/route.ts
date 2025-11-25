@@ -59,15 +59,15 @@ export async function GET(request: NextRequest) {
       SELECT 
         b.*,
         c.name as client_name,
-        c.phone as client_phone,
         s.name as service_name,
         s.price as service_price,
-        sm.name as staff_name,
-        sm.specialization as staff_specialization
+        u.name as staff_name,
+        st.specialization as staff_specialization
       FROM bookings b
       JOIN clients c ON b.client_id = c.id
       JOIN services s ON b.service_id = s.id
-      LEFT JOIN staff_members sm ON b.trainer_id = sm.id
+      LEFT JOIN staff st ON b.trainer_id = st.id
+      LEFT JOIN users u ON st.user_id = u.id
     `;
 
     const params: any[] = [];
@@ -145,8 +145,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Проверяем права доступа (админы, сисадмины и обычные пользователи могут создавать записи)
-    if (!hasRequiredRole(decoded, ['sys_admin', 'admin', 'user'])) {
+    // Проверяем права доступа (все авторизованные пользователи могут создавать записи)
+    if (!hasRequiredRole(decoded, ['sys_admin', 'admin', 'user', 'trainer', 'masseur'])) {
       console.log('❌ Недостаточно прав, роль:', decoded.role);
       return NextResponse.json({ error: 'Недостаточно прав' }, { status: 403 });
     }

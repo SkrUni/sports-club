@@ -124,13 +124,12 @@ export async function registerUser(data: RegisterData): Promise<User> {
     }
 
     const staffStmt = db.prepare(`
-      INSERT INTO staff_members (user_id, name, specialization, work_start, work_end, slot_duration)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO staff (user_id, specialization, work_start, work_end, slot_duration)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
     staffStmt.run(
       userId,
-      name,
       specialization,
       work_start || '09:00',
       work_end || '18:00',

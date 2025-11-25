@@ -9,8 +9,8 @@ let isDbInitialized = false;
 async function initializeDatabase() {
   if (!isDbInitialized) {
     console.log('Инициализация структуры базы данных...');
-    initDatabase();
-    migrateDatabase();
+initDatabase();
+migrateDatabase();
     await createDefaultServices(); // Исправлено: добавлен await
     isDbInitialized = true;
   }
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
     let user;
     try {
       user = await loginUser({ email, password });
-      console.log('Пользователь найден после входа:', user);
-      console.log('Роль пользователя:', user.role);
+    console.log('Пользователь найден после входа:', user);
+    console.log('Роль пользователя:', user.role);
     } catch (loginError: any) {
       console.error('Ошибка входа:', loginError);
       return NextResponse.json(
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     
     // Всегда возвращаем JSON, даже при критических ошибках
     try {
-      return NextResponse.json(
+    return NextResponse.json(
         { 
           error: error.message || 'Внутренняя ошибка сервера',
           details: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
           }
         }
-      );
+    );
     }
   }
 }
