@@ -1,7 +1,10 @@
 import Database from 'better-sqlite3';
 import { join } from 'path';
 
-const dbPath = join(process.cwd(), 'sports_club.db');
+// Используем /tmp для Docker контейнеров (Render, Railway и т.д.)
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/tmp/sports_club.db' 
+  : join(process.cwd(), 'sports_club.db');
 const db = new Database(dbPath);
 
 // Создание таблиц при инициализации
