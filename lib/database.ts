@@ -184,21 +184,28 @@ export async function createDefaultAdmin() {
   try {
     const bcrypt = require('bcryptjs');
     
-    // Проверяем, есть ли уже админ
-    const existingAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get('admin@sportsclub.com');
+    // Создаём sys_admin
+    const existingSysAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get('sysadmin@sportsclub.com');
+    if (!existingSysAdmin) {
+      const hashedPassword = await bcrypt.hash('sysadmin123', 12);
+      const stmt = db.prepare(`
+        INSERT INTO users (email, password, name, role)
+        VALUES (?, ?, ?, 'sys_admin')
+      `);
+      stmt.run('sysadmin@sportsclub.com', hashedPassword, 'Системный администратор');
+      console.log('Системный администратор создан: sysadmin@sportsclub.com / sysadmin123');
+    }
     
+    // Создаём admin
+    const existingAdmin = db.prepare('SELECT id FROM users WHERE email = ?').get('admin@sportsclub.com');
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash('admin123', 12);
-      
       const stmt = db.prepare(`
         INSERT INTO users (email, password, name, role)
         VALUES (?, ?, ?, 'admin')
       `);
-      
       stmt.run('admin@sportsclub.com', hashedPassword, 'Администратор');
       console.log('Администратор создан: admin@sportsclub.com / admin123');
-    } else {
-      console.log('Администратор уже существует');
     }
   } catch (error) {
     console.error('Ошибка создания администратора:', error);
