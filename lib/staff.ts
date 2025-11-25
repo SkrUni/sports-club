@@ -161,55 +161,56 @@ export function isTimeWithinWorkingHours(
     return { valid: false, error: 'Сотрудник не найден' };
   }
 
-  // Конвертируем время в минуты (поддерживаем как формат "HH", так и "HH:MM")
-  const bookingHours = parseInt(bookingTime, 10);
+  // Нормализуем время записи (формат "HH:00" или "HH:MM")
+  const normalizedBookingTime = bookingTime.length > 5 ? bookingTime.substring(0, 5) : bookingTime;
+  
+  const bookingMinutes = timeToMinutes(normalizedBookingTime);
+  const workStartMinutes = timeToMinutes(staff.work_start);
+  const workEndMinutes = timeToMinutes(staff.work_end);
+
+  // Проверяем, что время в допустимом диапазоне (6:00 - 23:00)
+  const [bookingHours] = normalizedBookingTime.split(':').map(p => parseInt(p, 10));
   if (isNaN(bookingHours) || bookingHours < 6 || bookingHours > 23) {
     return {
       valid: false,
-      error: `Некорректное время записи. Укажите часы от 6 до 23`
+      error: `Некорректное время записи. Укажите время от 6:00 до 23:00`
     };
   }
-  
-  const bookingMinutes = bookingHours * 60;
-  const workStartHours = parseInt(staff.work_start, 10);
-  const workEndHours = parseInt(staff.work_end, 10);
-  const workStartMinutes = isNaN(workStartHours) ? timeToMinutes(staff.work_start) : workStartHours * 60;
-  const workEndMinutes = isNaN(workEndHours) ? timeToMinutes(staff.work_end) : workEndHours * 60;
 
   console.log(`[isTimeWithinWorkingHours] Проверка времени для сотрудника ${staff.name}:`);
   console.log(`  Рабочее время: ${staff.work_start} - ${staff.work_end}`);
-  console.log(`  Время записи: ${bookingHours} часов (${bookingMinutes} минут)`);
+  console.log(`  Время записи: ${normalizedBookingTime} (${bookingMinutes} минут)`);
   console.log(`  Начало работы: ${workStartMinutes} минут, Конец работы: ${workEndMinutes} минут`);
 
   if (bookingMinutes < workStartMinutes) {
-    console.log(`  ❌ Время ${bookingHours} часов раньше начала рабочего дня`);
+    console.log(`  ❌ Время ${normalizedBookingTime} раньше начала рабочего дня`);
     return {
       valid: false,
-      error: `Время записи ${bookingHours} часов раньше начала рабочего дня (${staff.work_start} часов)`
+      error: `Время записи ${normalizedBookingTime} раньше начала рабочего дня (${staff.work_start})`
     };
   }
 
   // Проверяем, что время записи строго меньше времени окончания работы
   if (bookingMinutes >= workEndMinutes) {
-    console.log(`  ❌ Время ${bookingHours} часов позже или равно окончанию рабочего дня`);
+    console.log(`  ❌ Время ${normalizedBookingTime} позже или равно окончанию рабочего дня`);
     return {
       valid: false,
-      error: `Время записи ${bookingHours} часов позже или равно окончанию рабочего дня (${staff.work_end} часов)`
+      error: `Время записи ${normalizedBookingTime} позже или равно окончанию рабочего дня (${staff.work_end})`
     };
   }
 
   // Дополнительная проверка: убеждаемся, что время записи + длительность слота не превышает конец рабочего дня
   const slotEndMinutes = bookingMinutes + staff.slot_duration;
   if (slotEndMinutes > workEndMinutes) {
-    const slotEndHours = Math.floor(slotEndMinutes / 60);
-    console.log(`  ❌ Время записи ${bookingHours} часов + длительность ${staff.slot_duration} мин превышает конец рабочего дня`);
+    const slotEndTime = minutesToTime(slotEndMinutes);
+    console.log(`  ❌ Время записи ${normalizedBookingTime} + длительность ${staff.slot_duration} мин превышает конец рабочего дня`);
     return {
       valid: false,
-      error: `Время записи ${bookingHours} часов не подходит: занятие закончится в ${slotEndHours} часов, что позже окончания рабочего дня (${staff.work_end} часов)`
+      error: `Время записи ${normalizedBookingTime} не подходит: занятие закончится в ${slotEndTime}, что позже окончания рабочего дня (${staff.work_end})`
     };
   }
 
-  console.log(`  ✅ Время ${bookingHours} часов в пределах рабочего времени`);
+  console.log(`  ✅ Время ${normalizedBookingTime} в пределах рабочего времени`);
   return { valid: true };
 }
 

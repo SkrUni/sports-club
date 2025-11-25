@@ -29,8 +29,8 @@ const defaultStaffForm = {
   email: '',
   password: '',
   specialization: 'trainer' as Specialization,
-  work_start: '9',
-  work_end: '18',
+  work_start: '09:00',
+  work_end: '18:00',
   slot_duration: '60',
 };
 
@@ -292,27 +292,45 @@ export default function PersonnelPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="form-label">Начало рабочего дня (часы)</label>
+                        <label className="form-label">Начало рабочего дня</label>
                         <input
-                          type="number"
-                          min="6"
-                          max="23"
+                          type="time"
+                          min="06:00"
+                          max="23:00"
+                          step="3600"
                           className="form-input"
                           value={staffForm.work_start}
-                          onChange={(e) => setStaffForm({ ...staffForm, work_start: e.target.value })}
-                          placeholder="6-23"
+                          onChange={(e) => {
+                            // Округляем до целого часа
+                            const time = e.target.value;
+                            if (time) {
+                              const [hours] = time.split(':');
+                              setStaffForm({ ...staffForm, work_start: `${hours}:00` });
+                            } else {
+                              setStaffForm({ ...staffForm, work_start: '' });
+                            }
+                          }}
                         />
                       </div>
                       <div>
-                        <label className="form-label">Окончание рабочего дня (часы)</label>
+                        <label className="form-label">Окончание рабочего дня</label>
                         <input
-                          type="number"
-                          min="6"
-                          max="23"
+                          type="time"
+                          min="06:00"
+                          max="23:00"
+                          step="3600"
                           className="form-input"
                           value={staffForm.work_end}
-                          onChange={(e) => setStaffForm({ ...staffForm, work_end: e.target.value })}
-                          placeholder="6-23"
+                          onChange={(e) => {
+                            // Округляем до целого часа
+                            const time = e.target.value;
+                            if (time) {
+                              const [hours] = time.split(':');
+                              setStaffForm({ ...staffForm, work_end: `${hours}:00` });
+                            } else {
+                              setStaffForm({ ...staffForm, work_end: '' });
+                            }
+                          }}
                         />
                       </div>
                       <div>
@@ -426,7 +444,7 @@ export default function PersonnelPage() {
                               {member.specialization === 'trainer' ? 'Тренер' : 'Массажист'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {member.work_start}ч – {member.work_end}ч
+                              {member.work_start} – {member.work_end}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {member.slot_duration} мин

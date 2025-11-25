@@ -398,7 +398,7 @@ export default function ClientPortalPage() {
                           <td className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap">
                             <span className="inline-flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-md sm:rounded-lg">
                               <span className="hidden sm:inline">🕐</span>
-                            {booking.booking_time}ч
+                            {booking.booking_time}
                             </span>
                           </td>
                           <td className="px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap">
@@ -531,18 +531,27 @@ export default function ClientPortalPage() {
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       <span className="flex items-center gap-2">
                         <span>🕐</span>
-                        <span>Время (часы) *</span>
+                        <span>Время *</span>
                       </span>
                     </label>
                   <input
-                    type="number"
-                    min="6"
-                    max="23"
+                    type="time"
+                    min="06:00"
+                    max="23:00"
+                    step="3600"
                     required
                       className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 text-gray-900 font-medium shadow-sm hover:shadow-md"
                     value={bookingForm.booking_time}
-                    onChange={(e) => setBookingForm({...bookingForm, booking_time: e.target.value})}
-                    placeholder="6-23"
+                    onChange={(e) => {
+                      // Округляем до целого часа
+                      const time = e.target.value;
+                      if (time) {
+                        const [hours] = time.split(':');
+                        setBookingForm({...bookingForm, booking_time: `${hours}:00`});
+                      } else {
+                        setBookingForm({...bookingForm, booking_time: ''});
+                      }
+                    }}
                   />
                   </div>
                 </div>

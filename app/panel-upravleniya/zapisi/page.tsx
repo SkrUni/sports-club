@@ -433,7 +433,7 @@ export default function BookingsPage() {
                   bookings.map((booking) => (
                     <tr key={booking.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {booking.booking_time}ч
+                        {booking.booking_time}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {booking.staff_name
@@ -559,19 +559,27 @@ export default function BookingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="form-label">Время (часы) *</label>
+                    <label className="form-label">Время *</label>
                     <input
-                      type="number"
-                      min="6"
-                      max="23"
+                      type="time"
+                      min="06:00"
+                      max="23:00"
+                      step="3600"
                       required
                       className="form-input"
                       value={formData.booking_time}
                       onChange={(e) => {
-                        console.log('Время изменено:', e.target.value);
-                        setFormData({...formData, booking_time: e.target.value});
+                        // Округляем до целого часа
+                        const time = e.target.value;
+                        if (time) {
+                          const [hours] = time.split(':');
+                          const roundedTime = `${hours}:00`;
+                          console.log('Время изменено:', roundedTime);
+                          setFormData({...formData, booking_time: roundedTime});
+                        } else {
+                          setFormData({...formData, booking_time: ''});
+                        }
                       }}
-                      placeholder="6-23"
                     />
                   </div>
                   <div>
