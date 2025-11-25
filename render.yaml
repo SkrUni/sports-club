@@ -1,0 +1,32 @@
+services:
+  # Next.js приложение
+  - type: web
+    name: sports-club-nextjs
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    
+  # Spring Boot прокси
+  - type: web
+    name: sports-club-spring
+    env: docker
+    dockerfilePath: ./spring-proxy/Dockerfile
+    dockerContext: ./spring-proxy
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: NEXTJS_URL
+        fromService:
+          name: sports-club-nextjs
+          type: web
+          property: host
+

@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Java/Spring Boot
+spring-proxy/target/
+spring-proxy/.mvn/
+*.class
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+.idea/
+.vscode/
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# TypeScript
+*.tsbuildinfo

@@ -1,0 +1,59 @@
+# ==============================================
+# КОНФИГУРАЦИЯ SPRING BOOT PROXY SERVER (YAML)
+# Программа учёта услуг спортивного клуба
+# ==============================================
+
+spring:
+  application:
+    name: sports-club-proxy
+  
+  # Настройки кодировки
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+server:
+  port: 8080
+  
+  # Настройки сжатия
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+
+# URL Next.js приложения
+nextjs:
+  server:
+    url: http://localhost:3000
+
+# Логирование
+logging:
+  level:
+    root: INFO
+    com.sportsclub: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator для мониторинга
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+# Информация о приложении
+info:
+  app:
+    name: Sports Club Proxy Server
+    description: Reverse proxy для приложения учёта услуг спортивного клуба
+    version: 1.0.0
+    author: Ксения Гришаева
+    architecture: Spring Boot + Next.js
+

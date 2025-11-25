@@ -1,0 +1,9 @@
+target
+.mvn
+*.log
+.git
+.DS_Store
+README.md
+Dockerfile
+.dockerignore
+

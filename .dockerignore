@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+*.log
+*.db
+.DS_Store
+.env.local
+.env*.local
+spring-proxy
+README.md
+Dockerfile
+.dockerignore
+.gitignore
+
