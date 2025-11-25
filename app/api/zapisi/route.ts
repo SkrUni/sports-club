@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, hasRequiredRole } from '@/lib/auth';
-import db from '@/lib/database';
+import db, { initDatabase, migrateDatabase, createDefaultServices, createDefaultAdmin } from '@/lib/database';
 import { getStaffMemberByUserId, getStaffMemberById, isTimeWithinWorkingHours, isTimeSlotAvailable } from '@/lib/staff';
 
+// Флаг инициализации
+let isDbInitialized = false;
+
+async function initializeDatabase() {
+  if (isDbInitialized) {
+    return;
+  }
+  initDatabase();
+  migrateDatabase();
+  await createDefaultServices();
+  await createDefaultAdmin();
+  isDbInitialized = true;
+}
+
 export async function GET(request: NextRequest) {
+  // Инициализируем БД
+  await initializeDatabase();
   try {
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
@@ -87,6 +103,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Инициализируем БД
+    await initializeDatabase();
+    
     console.log('=== СОЗДАНИЕ ЗАПИСИ (API) ===');
     
     const token = request.cookies.get('auth-token')?.value;

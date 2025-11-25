@@ -6,9 +6,27 @@ import {
   StaffSpecialization,
 } from '@/lib/auth';
 import { listStaffMembers } from '@/lib/staff';
+import { initDatabase, migrateDatabase, createDefaultServices, createDefaultAdmin } from '@/lib/database';
+
+// Флаг инициализации
+let isDbInitialized = false;
+
+async function initializeDatabase() {
+  if (isDbInitialized) {
+    return;
+  }
+  initDatabase();
+  migrateDatabase();
+  await createDefaultServices();
+  await createDefaultAdmin();
+  isDbInitialized = true;
+}
 
 export async function GET(request: NextRequest) {
   try {
+    // Инициализируем БД
+    await initializeDatabase();
+    
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
@@ -33,6 +51,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Инициализируем БД
+    await initializeDatabase();
+    
     const token = request.cookies.get('auth-token')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
