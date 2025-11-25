@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -103,13 +104,30 @@ public class ProxyController {
                     .headers(responseHeaders)
                     .body(errorMessage.getBytes());
                     
-        } catch (Exception e) {
-            System.err.println("❌ Ошибка проксирования: " + e.getMessage());
+        } catch (ResourceAccessException e) {
+            // Ошибка подключения к Next.js (сервис недоступен, таймаут и т.д.)
+            System.err.println("❌ Ошибка подключения к Next.js: " + e.getMessage());
+            System.err.println("🔗 URL Next.js: " + nextJsServerUrl);
             e.printStackTrace();
             
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setContentType(MediaType.APPLICATION_JSON);
-            String errorJson = "{\"error\":\"Ошибка прокси: " + e.getMessage().replace("\"", "\\\"") + "\"}";
+            String errorJson = "{\"error\":\"Сервис временно недоступен. Next.js сервер не отвечает. Попробуйте позже или обновите страницу.\"}";
+            
+            return ResponseEntity
+                    .status(HttpStatus.BAD_GATEWAY)
+                    .headers(responseHeaders)
+                    .body(errorJson.getBytes());
+                    
+        } catch (Exception e) {
+            System.err.println("❌ Ошибка проксирования: " + e.getMessage());
+            System.err.println("🔗 URL Next.js: " + nextJsServerUrl);
+            e.printStackTrace();
+            
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+            String errorMessage = e.getMessage() != null ? e.getMessage().replace("\"", "\\\"") : "Неизвестная ошибка";
+            String errorJson = "{\"error\":\"Ошибка сервера: " + errorMessage + "\"}";
             
             return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
