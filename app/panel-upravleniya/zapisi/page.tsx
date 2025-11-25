@@ -433,7 +433,7 @@ export default function BookingsPage() {
                   bookings.map((booking) => (
                     <tr key={booking.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {booking.booking_time}
+                        {booking.booking_time}ч
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {booking.staff_name
@@ -559,9 +559,11 @@ export default function BookingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="form-label">Время *</label>
+                    <label className="form-label">Время (часы) *</label>
                     <input
-                      type="time"
+                      type="number"
+                      min="6"
+                      max="23"
                       required
                       className="form-input"
                       value={formData.booking_time}
@@ -569,7 +571,7 @@ export default function BookingsPage() {
                         console.log('Время изменено:', e.target.value);
                         setFormData({...formData, booking_time: e.target.value});
                       }}
-                      step="300"
+                      placeholder="6-23"
                     />
                   </div>
                   <div>

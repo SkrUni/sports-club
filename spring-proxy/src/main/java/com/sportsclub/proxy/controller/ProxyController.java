@@ -6,11 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Enumeration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 
 /**
  * Контроллер прокси-сервера.
@@ -32,6 +36,9 @@ public class ProxyController {
 
     public ProxyController() {
         this.restTemplate = new RestTemplate();
+        System.out.println("=================================================");
+        System.out.println("🔗 Next.js URL: " + nextJsServerUrl);
+        System.out.println("=================================================");
     }
 
     /**
@@ -70,12 +77,101 @@ public class ProxyController {
                     .headers(filterResponseHeaders(response.getHeaders()))
                     .body(response.getBody());
                     
+        } catch (HttpClientErrorException e) {
+            // Обрабатываем HTTP ошибки клиента (4xx)
+            System.err.println("❌ HTTP ошибка клиента: " + e.getStatusCode() + " - " + e.getStatusText());
+            
+            String errorMessage = extractErrorMessage(e);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+            
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .headers(responseHeaders)
+                    .body(errorMessage.getBytes());
+                    
+        } catch (HttpServerErrorException e) {
+            // Обрабатываем HTTP ошибки сервера (5xx)
+            System.err.println("❌ HTTP ошибка сервера: " + e.getStatusCode() + " - " + e.getStatusText());
+            
+            String errorMessage = extractErrorMessage(e);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+            
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .headers(responseHeaders)
+                    .body(errorMessage.getBytes());
+                    
         } catch (Exception e) {
             System.err.println("❌ Ошибка проксирования: " + e.getMessage());
+            e.printStackTrace();
+            
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+            String errorJson = "{\"error\":\"Ошибка прокси: " + e.getMessage().replace("\"", "\\\"") + "\"}";
+            
             return ResponseEntity
                     .status(HttpStatus.BAD_GATEWAY)
-                    .body(("Ошибка прокси: " + e.getMessage()).getBytes());
+                    .headers(responseHeaders)
+                    .body(errorJson.getBytes());
         }
+    }
+    
+    /**
+     * Извлекает сообщение об ошибке из HTTP исключения
+     */
+    private String extractErrorMessage(HttpClientErrorException e) {
+        try {
+            String responseBody = e.getResponseBodyAsString();
+            if (responseBody != null && !responseBody.isEmpty()) {
+                // Пытаемся распарсить JSON
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
+                
+                if (errorMap.containsKey("error")) {
+                    return "{\"error\":\"" + errorMap.get("error").toString().replace("\"", "\\\"") + "\"}";
+                }
+                
+                // Если это уже валидный JSON, возвращаем как есть
+                if (responseBody.trim().startsWith("{")) {
+                    return responseBody;
+                }
+            }
+        } catch (Exception parseException) {
+            System.err.println("⚠️ Не удалось распарсить ответ об ошибке: " + parseException.getMessage());
+        }
+        
+        // Если не удалось распарсить, возвращаем общее сообщение
+        return "{\"error\":\"" + e.getStatusText() + "\"}";
+    }
+    
+    /**
+     * Извлекает сообщение об ошибке из HTTP исключения сервера
+     */
+    private String extractErrorMessage(HttpServerErrorException e) {
+        try {
+            String responseBody = e.getResponseBodyAsString();
+            if (responseBody != null && !responseBody.isEmpty()) {
+                // Пытаемся распарсить JSON
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> errorMap = mapper.readValue(responseBody, Map.class);
+                
+                if (errorMap.containsKey("error")) {
+                    return "{\"error\":\"" + errorMap.get("error").toString().replace("\"", "\\\"") + "\"}";
+                }
+                
+                // Если это уже валидный JSON, возвращаем как есть
+                if (responseBody.trim().startsWith("{")) {
+                    return responseBody;
+                }
+            }
+        } catch (Exception parseException) {
+            System.err.println("⚠️ Не удалось распарсить ответ об ошибке: " + parseException.getMessage());
+        }
+        
+        // Если не удалось распарсить, возвращаем общее сообщение
+        return "{\"error\":\"" + e.getStatusText() + "\"}";
     }
 
     /**

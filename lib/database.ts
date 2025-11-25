@@ -241,7 +241,7 @@ export async function createDefaultAdmin() {
         INSERT INTO staff (user_id, specialization, work_start, work_end, slot_duration)
         VALUES (?, ?, ?, ?, ?)
       `);
-      staffStmt.run(trainerUser.id, 'trainer', '09:00', '18:00', 60);
+      staffStmt.run(trainerUser.id, 'trainer', '9', '18', 60);
       console.log('Запись в staff для тренера создана');
     }
     
@@ -265,7 +265,7 @@ export async function createDefaultAdmin() {
         INSERT INTO staff (user_id, specialization, work_start, work_end, slot_duration)
         VALUES (?, ?, ?, ?, ?)
       `);
-      staffStmt.run(masseurUser.id, 'masseur', '09:00', '18:00', 60);
+      staffStmt.run(masseurUser.id, 'masseur', '9', '18', 60);
       console.log('Запись в staff для массажиста создана');
     }
   } catch (error) {

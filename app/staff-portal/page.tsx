@@ -394,7 +394,7 @@ export default function StaffPortalPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 px-3 py-1 text-sm font-semibold text-emerald-700 bg-emerald-100 rounded-lg">
                             <span>🕐</span>
-                        {booking.booking_time}
+                        {booking.booking_time}ч
                           </span>
                       </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -456,7 +456,7 @@ export default function StaffPortalPage() {
                               day: 'numeric', 
                               month: 'long', 
                               year: 'numeric' 
-                            })} · {booking.booking_time}
+                            })} · {booking.booking_time}ч
                           </span>
                         </div>
                         <div className="flex items-center gap-2 mb-1">

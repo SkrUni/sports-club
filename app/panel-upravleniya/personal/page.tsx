@@ -29,8 +29,8 @@ const defaultStaffForm = {
   email: '',
   password: '',
   specialization: 'trainer' as Specialization,
-  work_start: '09:00',
-  work_end: '18:00',
+  work_start: '9',
+  work_end: '18',
   slot_duration: '60',
 };
 
@@ -292,21 +292,27 @@ export default function PersonnelPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="form-label">Начало рабочего дня</label>
+                        <label className="form-label">Начало рабочего дня (часы)</label>
                         <input
-                          type="time"
+                          type="number"
+                          min="6"
+                          max="23"
                           className="form-input"
                           value={staffForm.work_start}
                           onChange={(e) => setStaffForm({ ...staffForm, work_start: e.target.value })}
+                          placeholder="6-23"
                         />
                       </div>
                       <div>
-                        <label className="form-label">Окончание рабочего дня</label>
+                        <label className="form-label">Окончание рабочего дня (часы)</label>
                         <input
-                          type="time"
+                          type="number"
+                          min="6"
+                          max="23"
                           className="form-input"
                           value={staffForm.work_end}
                           onChange={(e) => setStaffForm({ ...staffForm, work_end: e.target.value })}
+                          placeholder="6-23"
                         />
                       </div>
                       <div>
@@ -420,7 +426,7 @@ export default function PersonnelPage() {
                               {member.specialization === 'trainer' ? 'Тренер' : 'Массажист'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {member.work_start} – {member.work_end}
+                              {member.work_start}ч – {member.work_end}ч
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {member.slot_duration} мин
