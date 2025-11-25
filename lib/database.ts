@@ -81,6 +81,19 @@ export function initDatabase() {
     )
   `);
 
+  // Таблица персонала (тренеры и массажисты)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS staff (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL UNIQUE,
+      specialization TEXT NOT NULL,
+      work_start TEXT NOT NULL,
+      work_end TEXT NOT NULL,
+      slot_duration INTEGER DEFAULT 60,
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+  `);
+
   console.log('База данных инициализирована');
 }
 

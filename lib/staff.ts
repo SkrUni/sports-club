@@ -19,19 +19,19 @@ export interface StaffAvailability {
 }
 
 export function getStaffMemberByUserId(userId: number): StaffMember | null {
-  const stmt = db.prepare('SELECT * FROM staff_members WHERE user_id = ?');
+  const stmt = db.prepare('SELECT * FROM staff WHERE user_id = ?');
   const staff = stmt.get(userId) as StaffMember | undefined;
   return staff ?? null;
 }
 
 export function getStaffMemberById(staffId: number): StaffMember | null {
-  const stmt = db.prepare('SELECT * FROM staff_members WHERE id = ?');
+  const stmt = db.prepare('SELECT * FROM staff WHERE id = ?');
   const staff = stmt.get(staffId) as StaffMember | undefined;
   return staff ?? null;
 }
 
 export function listStaffMembers(): StaffMember[] {
-  const stmt = db.prepare('SELECT * FROM staff_members ORDER BY name ASC');
+  const stmt = db.prepare('SELECT * FROM staff ORDER BY id ASC');
   return stmt.all() as StaffMember[];
 }
 
@@ -50,7 +50,7 @@ export function upsertStaffSchedule(
 
   db.prepare(
     `
-      UPDATE staff_members
+      UPDATE staff
       SET work_start = ?, work_end = ?, slot_duration = ?
       WHERE id = ?
     `
