@@ -1,5 +1,6 @@
 package com.sportsclub.proxy.controller;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +39,13 @@ public class ProxyController {
 
     public ProxyController() {
         this.restTemplate = new RestTemplate();
+    }
+
+    /**
+     * Инициализация после инъекции зависимостей Spring
+     */
+    @PostConstruct
+    public void init() {
         // Нормализуем URL: добавляем протокол, если его нет
         this.nextJsServerUrl = normalizeUrl(nextJsServerUrlRaw);
         System.out.println("=================================================");
