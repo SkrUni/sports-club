@@ -28,5 +28,5 @@ services:
         fromService:
           name: sports-club-nextjs
           type: web
-          property: host
+          property: url
 

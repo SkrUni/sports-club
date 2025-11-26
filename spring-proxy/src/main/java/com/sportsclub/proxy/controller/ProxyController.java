@@ -31,15 +31,37 @@ import java.util.Map;
 public class ProxyController {
 
     @Value("${nextjs.server.url:http://localhost:3000}")
-    private String nextJsServerUrl;
+    private String nextJsServerUrlRaw;
 
+    private String nextJsServerUrl;
     private final RestTemplate restTemplate;
 
     public ProxyController() {
         this.restTemplate = new RestTemplate();
+        // Нормализуем URL: добавляем протокол, если его нет
+        this.nextJsServerUrl = normalizeUrl(nextJsServerUrlRaw);
         System.out.println("=================================================");
-        System.out.println("🔗 Next.js URL: " + nextJsServerUrl);
+        System.out.println("🔗 Next.js URL (исходный): " + nextJsServerUrlRaw);
+        System.out.println("🔗 Next.js URL (нормализованный): " + nextJsServerUrl);
         System.out.println("=================================================");
+    }
+
+    /**
+     * Нормализует URL: добавляет протокол https://, если его нет
+     */
+    private String normalizeUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return "http://localhost:3000";
+        }
+        
+        // Если URL уже содержит протокол, возвращаем как есть
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+        
+        // Если URL не содержит протокол, добавляем https://
+        // Это нужно для Render.com, где property: host возвращает только хост
+        return "https://" + url;
     }
 
     /**
