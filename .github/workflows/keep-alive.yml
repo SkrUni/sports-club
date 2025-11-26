@@ -1,20 +1,42 @@
-name: Keep Next.js Alive
+name: Keep Services Alive
 
 on:
   schedule:
-    # Запускается каждые 10 минут
-    - cron: '*/10 * * * *'
+    # Запускается каждые 5 минут для предотвращения "засыпания"
+    - cron: '*/5 * * * *'
   workflow_dispatch: # Можно запустить вручную
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Ping Next.js
+      - name: Пробуждение Next.js (сначала)
         run: |
-          curl -f https://sports-club-nextjs.onrender.com/ || echo "Service might be sleeping, but ping sent"
+          echo "🔔 Пробуждение Next.js сервиса..."
+          curl -s -m 30 --retry 2 --retry-delay 5 https://sports-club-nextjs.onrender.com/ > /dev/null || echo "⚠️ Next.js может быть в процессе пробуждения"
+          sleep 3
       
-      - name: Ping Spring Boot
+      - name: Пробуждение Spring Boot (основной вход)
         run: |
-          curl -f https://sports-club-spring.onrender.com/ || echo "Service might be sleeping, but ping sent"
+          echo "🔔 Пробуждение Spring Boot прокси..."
+          curl -s -m 30 --retry 2 --retry-delay 5 https://sports-club-spring.onrender.com/ > /dev/null || echo "⚠️ Spring Boot может быть в процессе пробуждения"
+          sleep 3
+      
+      - name: Повторный пинг Next.js
+        run: |
+          echo "🔄 Повторный пинг Next.js..."
+          curl -s -m 30 https://sports-club-nextjs.onrender.com/ > /dev/null || echo "⚠️ Next.js может быть в процессе пробуждения"
+      
+      - name: Повторный пинг Spring Boot
+        run: |
+          echo "🔄 Повторный пинг Spring Boot..."
+          curl -s -m 30 https://sports-club-spring.onrender.com/ > /dev/null || echo "⚠️ Spring Boot может быть в процессе пробуждения"
+      
+      - name: Проверка health endpoints
+        run: |
+          echo "🏥 Проверка health endpoints..."
+          curl -s -m 30 https://sports-club-spring.onrender.com/actuator/health || echo "⚠️ Health check недоступен"
+          echo ""
+          echo "✅ Все пинги отправлены. Сервисы должны оставаться активными."
 
